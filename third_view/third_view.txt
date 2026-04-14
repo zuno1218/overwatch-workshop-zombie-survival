@@ -1,0 +1,139 @@
+rule("3인칭 변수")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	action
+	{
+		Event Player.cameraPosition[0] = -0.600;
+		Event Player.cameraPosition[1] = 1.700;
+		Event Player.cameraPosition[2] = 2;
+	}
+}
+
+rule("3인칭")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	action
+	{
+		Start Camera(Event Player, Ray Cast Hit Position(World Vector Of(Vector(0, Event Player.cameraPosition[1], 0), Event Player,
+			Rotation And Translation), World Vector Of(Vector(Event Player.cameraPosition[0],
+			Event Player.cameraPosition[1] + Sine From Degrees(Vertical Facing Angle Of(Event Player)) * Event Player.cameraPosition[2],
+			0 - Cosine From Degrees(Vertical Facing Angle Of(Event Player)) * Event Player.cameraPosition[2]), Event Player,
+			Rotation And Translation), Null, All Players(All Teams), False), World Vector Of(Vector(X Component Of(Local Vector Of(
+			Ray Cast Hit Position(World Vector Of(Vector(0, Event Player.cameraPosition[1], 0), Event Player, Rotation And Translation),
+			World Vector Of(Vector(Event Player.cameraPosition[0], Event Player.cameraPosition[1] + Sine From Degrees(
+			Vertical Facing Angle Of(Event Player)) * Event Player.cameraPosition[2], 0 - Cosine From Degrees(Vertical Facing Angle Of(
+			Event Player)) * Event Player.cameraPosition[2]), Event Player, Rotation And Translation), Null, All Players(All Teams),
+			False), Event Player, Rotation And Translation)), Event Player.cameraPosition[1] - Sine From Degrees(Vertical Facing Angle Of(
+			Event Player)) * 100, Cosine From Degrees(Vertical Facing Angle Of(Event Player)) * 100), Event Player,
+			Rotation And Translation), 100);
+		Create Effect(Event Player, Sphere, Event Player.aimColor, Update Every Frame(Ray Cast Hit Position(Eye Position(Event Player),
+			Event Player + (Eye Position(Event Player) - Event Player) + Facing Direction Of(Event Player) * 50, All Players(All Teams),
+			Event Player, False)), 0.200, Visible To Position Radius and Color);
+	}
+}
+
+rule("3인칭 보조 에임 1 생존")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(솔저: 76);
+		Ray Cast Hit Player(Event Player + (Eye Position(Event Player) - Event Player), Event Player + (Eye Position(Event Player)
+			- Event Player) + Facing Direction Of(Event Player) * 100, All Players(All Teams), Players On Hero(Hero(솔저: 76), All Teams),
+			True) != 0;
+	}
+
+	action
+	{
+		Event Player.aimColor = Color(Red);
+	}
+}
+
+rule("3인칭 보조 에임 2 생존")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(솔저: 76);
+		Ray Cast Hit Player(Event Player + (Eye Position(Event Player) - Event Player), Event Player + (Eye Position(Event Player)
+			- Event Player) + Facing Direction Of(Event Player) * 100, All Players(All Teams), Players On Hero(Hero(솔저: 76), All Teams),
+			True) == 0;
+	}
+
+	action
+	{
+		Event Player.aimColor = Color(흰색);
+	}
+}
+
+rule("3인칭 보조 에임 1 좀비")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) != Hero(솔저: 76);
+		Ray Cast Hit Player(Event Player + (Eye Position(Event Player) - Event Player), Event Player + (Eye Position(Event Player)
+			- Event Player) + Facing Direction Of(Event Player) * 100, Players On Hero(Hero(솔저: 76), All Teams), Event Player, True) != 0;
+	}
+
+	action
+	{
+		Event Player.aimColor = Color(Red);
+	}
+}
+
+rule("3인칭 보조 에임 2 좀비")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) != Hero(솔저: 76);
+		Ray Cast Hit Player(Event Player + (Eye Position(Event Player) - Event Player), Event Player + (Eye Position(Event Player)
+			- Event Player) + Facing Direction Of(Event Player) * 100, Players On Hero(Hero(솔저: 76), All Teams), Event Player, True) == 0;
+	}
+
+	action
+	{
+		Event Player.aimColor = Color(흰색);
+	}
+}

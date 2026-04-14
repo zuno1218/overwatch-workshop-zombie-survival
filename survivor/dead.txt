@@ -1,0 +1,136 @@
+rule("사망")
+{
+	event
+	{
+		Player Died;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(솔저: 76);
+		Event Was Environment == False;
+	}
+
+	action
+	{
+		Event Player.dead = True;
+		Event Player.life -= 1;
+		If(Event Player.life == 0 || Number Of Heroes(Hero(솔저: 76), All Teams) == 1);
+			Resurrect(Event Player);
+			Wait(0.100, Ignore Condition);
+			Start Forcing Player To Be Hero(Event Player, Hero(정크랫));
+			Wait(0.250, Ignore Condition);
+			Play Effect(All Players(All Teams), Bad Explosion, Color(Red), Event Player, 2);
+			Play Effect(All Players(All Teams), Debuff Impact Sound, Color(흰색), Event Player, 100);
+			Abort;
+		End;
+		Resurrect(Event Player);
+		Set Healing Received(Event Player, 0);
+		Set Player Health(Event Player, 1);
+		Set Status(Event Player, Null, Unkillable, 999);
+		Create Effect(All Players(All Teams), Ring, Color(Yellow), Event Player, 1.300, Visible To Position and Radius);
+		Event Player.resInfo1 = Last Created Entity;
+		Create Icon(Remove From Array(All Players(All Teams), Event Player), Position Of(Event Player) + Vector(0, 1, 0), Plus,
+			Visible To and Position, Color(Yellow), True);
+		Event Player.resInfo2 = Last Created Entity;
+		Create In-World Text(Remove From Array(All Players(All Teams), Event Player), Custom String("부활 : {0}", Event Player), Position Of(
+			Event Player) + Vector(0, 2.500, 0), 1, Do Not Clip, Visible To and Position, Color(흰색), Default Visibility);
+		Event Player.resInfo3 = Last Text ID;
+		Start Accelerating(Event Player, Vector(0, 2, 2), 70, 999, To Player, Direction Rate and Max Speed);
+		Start Rule(zombieProgress, Restart Rule);
+		Wait(0.250, Ignore Condition);
+		Stop Accelerating(Event Player);
+	}
+}
+
+rule("좀비화")
+{
+	event
+	{
+		Subroutine;
+		zombieProgress;
+	}
+
+	action
+	{
+		Event Player.zombieProgress = 0;
+		Create Effect(All Players(All Teams), Bad Aura, Color(Red), Event Player, 0.500, Visible To Position and Radius);
+		Event Player.zombieProgressEffect = Last Created Entity;
+		Create Progress Bar In-World Text(Event Player, Event Player.zombieProgress, Custom String("좀비화"), World Vector Of(Vector(
+			Event Player.cameraPosition[0], 0, -1.500), Event Player, Rotation And Translation), 0.900, Do Not Clip, Color(Red), Color(흰색),
+			Visible To Position and Values, Default Visibility);
+		Event Player.zombieProgressBar = Last Text ID;
+		Chase Player Variable Over Time(Event Player, zombieProgress, 100, 5, Destination and Duration);
+		Wait Until(Event Player.dead == False, 5);
+		Stop Chasing Player Variable(Event Player, zombieProgress);
+		If(Event Player.dead == True);
+			Resurrect(Event Player);
+			Clear Status(Event Player, Knocked Down);
+			Clear Status(Event Player, Unkillable);
+			Start Forcing Player To Be Hero(Event Player, Hero(정크랫));
+			Wait(0.250, Ignore Condition);
+			Play Effect(All Players(All Teams), Bad Explosion, Color(Red), Event Player, 2);
+			Play Effect(All Players(All Teams), Debuff Impact Sound, Color(흰색), Event Player, 100);
+		End;
+		Destroy Effect(Event Player.resInfo1);
+		Destroy Icon(Event Player.resInfo2);
+		Destroy In-World Text(Event Player.resInfo3);
+		Destroy Effect(Event Player.zombieProgressEffect);
+		Destroy Progress Bar In-World Text(Event Player.zombieProgressBar);
+	}
+}
+
+rule("낙사")
+{
+	event
+	{
+		Player Died;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(솔저: 76);
+		Event Was Environment == True;
+	}
+
+	action
+	{
+		Respawn(Event Player);
+		Wait(0.100, Ignore Condition);
+		Start Forcing Player To Be Hero(Event Player, Hero(정크랫));
+		Wait(0.250, Ignore Condition);
+		Play Effect(All Players(All Teams), Bad Explosion, Color(Red), Event Player, 2);
+		Play Effect(All Players(All Teams), Debuff Impact Sound, Color(흰색), Event Player, 100);
+	}
+}
+
+rule("사망 기절")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(솔저: 76);
+		Event Player.dead == True;
+		Has Status(Event Player, Knocked Down) == False;
+	}
+
+	action
+	{
+		Wait(0.100, Ignore Condition);
+		Set Facing(Event Player, Vector(0, -1, 0), To Player);
+		Set Status(Event Player, Null, Knocked Down, 999);
+	}
+}

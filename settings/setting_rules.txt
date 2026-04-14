@@ -1,0 +1,254 @@
+rule("게임 HUD 끄기")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	action
+	{
+		Disable Game Mode HUD(Event Player);
+		Disable Scoreboard(Event Player);
+	}
+}
+
+rule("기본 HUD")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+	}
+
+	action
+	{
+		Global.gameTimerColor = Color(흰색);
+		Create HUD Text(All Players(All Teams), Custom String("{0}:{1}", Round To Integer(Global.gameTime / 60, Down),
+			Global.gameTime % 60), Null, Null, Top, 0, Global.gameTimerColor, Color(흰색), Color(흰색), Visible To String and Color,
+			Default Visibility);
+		Create HUD Text(All Players(All Teams), Null, Custom String("\n\n\n\n\n\n\n\n\n\n\n\n\n"), Null, Left, 0, Color(흰색), Color(흰색),
+			Color(흰색), Visible To and String, Default Visibility);
+		Create HUD Text(All Players(All Teams), Hero Icon String(Hero(솔저: 76)), Custom String("생존자"), Number Of Heroes(Hero(솔저: 76),
+			All Teams), Left, 1, Color(흰색), Color(Blue), Color(흰색), Visible To and String, Default Visibility);
+		Create HUD Text(All Players(All Teams), Hero Icon String(Hero(정크랫)), Custom String("좀비니"), Number Of Heroes(Hero(정크랫), All Teams),
+			Left, 2, Color(흰색), Color(Red), Color(흰색), Visible To and String, Default Visibility);
+	}
+}
+
+rule("게임 설정")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	action
+	{
+		Disable Built-In Game Mode Music;
+		Disable Built-In Game Mode Scoring;
+		Disable Built-In Game Mode Announcer;
+		Disable Built-In Game Mode Completion;
+	}
+}
+
+rule("게임 시간 설정")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	action
+	{
+		Global.gameTime = 180;
+	}
+}
+
+rule("게임 타이머")
+{
+	event
+	{
+		Subroutine;
+		gameTimer;
+	}
+
+	action
+	{
+		While(Global.gameTime > 0);
+			Wait(1, Ignore Condition);
+			Global.gameTime -= 1;
+			If(Global.gameTime == 30);
+				Global.gameTimerColor = Color(Red);
+				Big Message(All Players(All Teams), Custom String("30초 남았습니다."));
+			End;
+		End;
+	}
+}
+
+rule("게임 시작 1")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	action
+	{
+		Wait(8, Ignore Condition);
+		Start Rule(gameTimer, Do Nothing);
+		Global.gameProgress = True;
+		Big Message(All Players(All Teams), Custom String("잠시 후 좀비킹이 결정됩니다."));
+		Wait(5, Ignore Condition);
+		Global.hostZombie = Random Value In Array(All Players(All Teams));
+		All Players(All Teams).selectZombie = True;
+	}
+}
+
+rule("게임 시작 2")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	action
+	{
+		Disable Built-In Game Mode Respawning(Event Player);
+		Start Forcing Player To Be Hero(Event Player, Hero(솔저: 76));
+	}
+}
+
+rule("좀비 결정")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Event Player.selectZombie == True;
+	}
+
+	action
+	{
+		If(Global.hostZombie == Event Player);
+			Start Forcing Player To Be Hero(Event Player, Hero(로드호그));
+			Wait(0.250, Ignore Condition);
+			Big Message(All Players(All Teams), Custom String("{0}님이 좀비킹으로 변하였습니다.", Global.hostZombie));
+			Play Effect(All Players(All Teams), Bad Pickup Effect, Color(Red), Event Player, 5);
+		End;
+		Play Effect(Event Player, Ring Explosion Sound, Color(흰색), Event Player, 100);
+	}
+}
+
+rule("좀비 승리")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Number Of Heroes(Hero(솔저: 76), All Teams) == 0;
+	}
+
+	action
+	{
+		Declare Player Victory(Global.hostZombie);
+		Wait(3, Ignore Condition);
+		If(Global.gameTime < 150);
+			Restart Match;
+		Else;
+			Return to Lobby;
+	}
+}
+
+rule("생존 승리 1")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Global.gameTime == 0;
+	}
+
+	action
+	{
+		Declare Player Victory(Players On Hero(Hero(솔저: 76), All Teams));
+		Wait(3, Ignore Condition);
+		If(Global.gameTime < 150);
+			Restart Match;
+		Else;
+			Return to Lobby;
+	}
+}
+
+rule("생존 승리 2")
+{
+	event
+	{
+		Player Died;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Global.hostZombie == Event Player;
+		Event Was Environment == False;
+	}
+
+	action
+	{
+		Declare Player Victory(Players On Hero(Hero(솔저: 76), All Teams));
+		Wait(3, Ignore Condition);
+		If(Global.gameTime < 150);
+			Restart Match;
+		Else;
+			Return to Lobby;
+	}
+}
+
+rule("생존 승리 3")
+{
+	event
+	{
+		Player Left Match;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Global.hostZombie == Event Player;
+	}
+
+	action
+	{
+		Declare Player Victory(Players On Hero(Hero(솔저: 76), All Teams));
+		Wait(3, Ignore Condition);
+		If(Global.gameTime < 150);
+			Restart Match;
+		Else;
+			Return to Lobby;
+	}
+}

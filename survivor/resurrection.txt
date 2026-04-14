@@ -1,0 +1,133 @@
+rule("부활 변수")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(솔저: 76);
+	}
+
+	action
+	{
+		Event Player.life = 3;
+		Event Player.dead = False;
+		Event Player.canResurrect = False;
+		Event Player.resurrectWho = Null;
+		Event Player.inResurrectZone = Empty Array;
+	}
+}
+
+rule("사망 지점 근접")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(솔저: 76);
+		Remove From Array(Players Within Radius(Event Player, 1.500, All Teams, Surfaces), Event Player) != Event Player.inResurrectZone;
+		Event Player.dead == True;
+	}
+
+	action
+	{
+		Event Player.inResurrectZone = Remove From Array(Players Within Radius(Event Player, 1.500, All Teams, Surfaces), Event Player);
+		Remove From Array(Players Within Radius(Event Player, 1.500, All Teams, Surfaces), Event Player).canResurrect = True;
+		Remove From Array(Players Within Radius(Event Player, 1.500, All Teams, Surfaces), Event Player).resurrectWho = Event Player;
+	}
+}
+
+rule("부활")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(솔저: 76);
+		Event Player.canResurrect == True;
+	}
+
+	action
+	{
+		If(Event Player.dead == False && Hero Of(Event Player) == Hero(솔저: 76));
+			Set Player Health(Event Player.resurrectWho, 130);
+			Event Player.canResurrect = False;
+			Event Player.resurrectWho = Null;
+		Else;
+			Event Player.canResurrect = False;
+			Event Player.resurrectWho = Null;
+	}
+}
+
+rule("부활 완료")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(솔저: 76);
+		Event Player.dead == True;
+		Health(Event Player) == 130;
+	}
+
+	action
+	{
+		Event Player.dead = False;
+		Event Player.inResurrectZone = Empty Array;
+		Clear Status(Event Player, Knocked Down);
+		Clear Status(Event Player, Unkillable);
+		Set Status(Event Player, Null, Unkillable, 1.700);
+		Play Effect(All Players(All Teams), Good Explosion, Color(흰색), Event Player, 2);
+		Play Effect(All Players(All Teams), Buff Explosion Sound, Color(흰색), Event Player, 100);
+		Set Healing Received(Event Player, 100);
+		Destroy Effect(Event Player.resInfo1);
+		Destroy Icon(Event Player.resInfo2);
+		Destroy In-World Text(Event Player.resInfo3);
+		Set Move Speed(Event Player, 150);
+		Wait(1.500, Ignore Condition);
+		Set Move Speed(Event Player, 100);
+	}
+}
+
+disabled rule("부활 테스트")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Is Button Held(Event Player, Button(Crouch)) == True;
+	}
+
+	action
+	{
+		Set Player Health(Event Player, 1);
+	}
+}

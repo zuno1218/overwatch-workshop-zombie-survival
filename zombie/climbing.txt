@@ -1,0 +1,55 @@
+rule("벽타기")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) != Hero(솔저: 76);
+		Distance Between(Ray Cast Hit Position(Event Player, World Vector Of(Vector(0, 2, 1.500), Event Player, Rotation And Translation),
+			Null, Null, False), Event Player + Vector(0, 2, 0)) < 1.500;
+		Is Button Held(Event Player, Button(Interact)) == True;
+		Event Player.climbing == False;
+		Has Status(Event Player, Knocked Down) == False;
+	}
+
+	action
+	{
+		Event Player.climbing = True;
+		Destroy In-World Text(Event Player.climbingUI);
+		Start Forcing Throttle(Event Player, 0, 0, 0, 0, 0, 0);
+		Start Accelerating(Event Player, Vector(0, 1, 0), 25, 10, To World, Direction Rate and Max Speed);
+		Wait Until(Distance Between(Ray Cast Hit Position(Position Of(Event Player), World Vector Of(Vector(0, 0, 1.500), Event Player,
+			Rotation And Translation), Null, Null, False), Event Player) == 1.500 || Event Player.climbing == False, 999);
+		Stop Forcing Throttle(Event Player);
+		Stop Accelerating(Event Player);
+		Event Player.climbing = False;
+	}
+}
+
+rule("벽타기 해제")
+{
+	event
+	{
+		Player Died;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) != Hero(솔저: 76);
+		Event Player.climbing == True;
+	}
+
+	action
+	{
+		Event Player.climbing = False;
+	}
+}

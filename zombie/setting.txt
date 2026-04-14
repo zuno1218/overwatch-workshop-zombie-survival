@@ -1,0 +1,82 @@
+disabled rule("좀비 속도 설정")
+{
+	event
+	{
+		Subroutine;
+		zombieSpeed;
+	}
+
+	action
+	{
+		Set Move Speed(Remove From Array(All Players(All Teams), Players On Hero(Hero(솔저: 76), All Teams)), 117 + 3 * Number Of Heroes(
+			Hero(솔저: 76), All Teams));
+		If(Global.ultra == True);
+			Set Move Speed(Global.hostZombie, 137 + 3 * Number Of Heroes(Hero(솔저: 76), All Teams));
+		End;
+	}
+}
+
+disabled rule("좀비 피격 데미지 설정")
+{
+	event
+	{
+		Subroutine;
+		zombieDamage;
+	}
+
+	action
+	{
+		Set Damage Received(Remove From Array(All Players(All Teams), Players On Hero(Hero(솔저: 76), All Teams)), 45 - 2.500 * (
+			Number Of Heroes(Hero(솔저: 76), All Teams) - Number Of Heroes(Hero(정크랫), All Teams) - 1));
+	}
+}
+
+rule("좌클릭 평타")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) != Hero(솔저: 76);
+		Is Button Held(Event Player, Button(Primary Fire)) == True;
+	}
+
+	action
+	{
+		Press Button(Event Player, Button(Melee));
+	}
+}
+
+rule("좀비 외곽선")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) != Hero(솔저: 76);
+	}
+
+	action
+	{
+		Wait(1, Ignore Condition);
+		Stop Forcing Player Outlines(Event Player, Remove From Array(Players On Hero(Hero(솔저: 76), All Teams), Event Player));
+		Stop Forcing Player Outlines(Players On Hero(Hero(솔저: 76), All Teams), Event Player);
+		Start Forcing Player Outlines(Event Player, Remove From Array(All Players(All Teams), Players On Hero(Hero(솔저: 76), All Teams)),
+			False, Color(흰색), Default);
+		Stop Forcing Player Outlines(Global.hostZombie, All Players(All Teams));
+		Start Forcing Player Outlines(Global.hostZombie, Remove From Array(All Players(All Teams), Players On Hero(Hero(솔저: 76),
+			All Teams)), False, Color(흰색), Default);
+	}
+}

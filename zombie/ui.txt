@@ -1,0 +1,75 @@
+rule("벽타기 UI")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) != Hero(솔저: 76);
+		Distance Between(Ray Cast Hit Position(Event Player, World Vector Of(Vector(0, 2, 1.500), Event Player, Rotation And Translation),
+			Null, Null, False), Event Player + Vector(0, 2, 0)) < 1.500;
+		Event Player.climbing == False;
+	}
+
+	action
+	{
+		Create In-World Text(Event Player, Custom String("벽 타기: 상호작용 키"), World Vector Of(Vector(-0.800, 1.500 - Sine From Degrees(
+			Vertical Facing Angle Of(Event Player)) * Event Player.cameraPosition[2], Cosine From Degrees(Vertical Facing Angle Of(
+			Event Player)) * 2), Event Player, Rotation And Translation), 0.900, Do Not Clip, Visible To Position and String, Color(흰색),
+			Default Visibility);
+		Event Player.climbingUI = Last Text ID;
+	}
+}
+
+rule("벽타기 UI 제거")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) != Hero(솔저: 76);
+		Distance Between(Ray Cast Hit Position(Event Player, World Vector Of(Vector(0, 2, 1.500), Event Player, Rotation And Translation),
+			Null, Null, False), Event Player + Vector(0, 2, 0)) == 1.500;
+		Event Player.climbing == False;
+	}
+
+	action
+	{
+		Destroy In-World Text(Event Player.climbingUI);
+	}
+}
+
+rule("울트라 UI")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(로드호그);
+	}
+
+	action
+	{
+		Create Progress Bar In-World Text(Event Player, Event Player.ultraGage, Custom String("울트라"), World Vector Of(Vector(0.500,
+			2.500 - Sine From Degrees(Vertical Facing Angle Of(Event Player)) * Event Player.cameraPosition[2], Cosine From Degrees(
+			Vertical Facing Angle Of(Event Player)) * 2), Event Player, Rotation And Translation), 0.100, Do Not Clip, Color(Red), Color(
+			흰색), Visible To Position and Values, Default Visibility);
+	}
+}

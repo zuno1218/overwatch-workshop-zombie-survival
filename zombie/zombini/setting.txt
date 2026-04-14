@@ -1,0 +1,56 @@
+rule("정크랫 기본 설정")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(정크랫);
+	}
+
+	action
+	{
+		Stop Damage Modification(Event Player.damageMod);
+		Start Damage Modification(Event Player, Remove From Array(All Players(All Teams), Players On Hero(Hero(솔저: 76), All Teams)), 0,
+			Receivers Damagers and Damage Percent);
+		Set Move Speed(Event Player, Global.zombieSpeed - 30);
+		Set Jump Vertical Speed(Event Player, 125);
+		Set Damage Dealt(Event Player, 120);
+		Set Healing Received(Event Player, 100);
+		Set Ability 1 Enabled(Event Player, False);
+		Destroy Icon(Event Player.posDetect);
+	}
+}
+
+rule("평타 위치 노출")
+{
+	event
+	{
+		Player Dealt Damage;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(정크랫);
+		Hero Of(Victim) == Hero(솔저: 76);
+		Victim.dead == False;
+	}
+
+	action
+	{
+		Create Icon(All Players(All Teams), Victim, Eye, Visible To and Position, Color(Red), True);
+		Event Player.posDetect = Last Created Entity;
+		Small Message(Victim, Custom String("위치가 노출됩니다!"));
+		Wait(1.500, Ignore Condition);
+		Destroy Icon(Event Player.posDetect);
+		Small Message(Victim, Custom String("위치 노출이 중단됩니다."));
+	}
+}

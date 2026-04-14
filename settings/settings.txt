@@ -1,0 +1,148 @@
+settings
+{
+	main
+	{
+		모드 이름: "랜덤 좀비 서바이벌"
+		설명: "랜덤으로 정해지는 좀비킹으로부터 살아남으세요!\n좀비킹은 솔저를 좀비니로 감염시킵니다.\n\n브금: https://bgmstore.net/view/imtqj/%EB%B2%84%EB%B8%94%ED%8C%8C%EC%9D%B4%ED%84%B0%20%EC%A2%80%EB%B9%84%EB%8C%80%EC%A0%84%20(%EA%B8%B4%EB%B0%95%20%EA%B2%A9%EB%A0%AC)\n\nVer.3\n\n코드: 208AQ\n\n제작: 참새#31235"
+	}
+
+	lobby
+	{
+		경기 음성 대화: 활성화
+		대기실로 돌아가기: 안 함
+	}
+
+	modes
+	{
+		데스매치
+		{
+			disabled maps
+			{
+				워크샵 개활지
+				워크샵 개활지 밤
+				워크샵 그린 스크린
+				워크샵 방
+				워크샵 섬
+				워크샵 섬 밤
+			}
+		}
+
+		일반
+		{
+			게임 모드 시작: 즉시
+			무작위 영웅으로 부활: 활성화
+			생명력 팩 생성: 비활성화
+			영웅 변경 허용: 비활성화
+			영웅 제한: 비활성화
+			직접 부활: 비활성화
+		}
+	}
+
+	heroes
+	{
+		일반
+		{
+			로드호그
+			{
+				궁극기 돼재앙: 비활성화
+				기본 발사: 비활성화
+				받는 피해: 14%
+				보조 발사: 비활성화
+				사슬 갈고리: 비활성화
+				생명력: 500%
+				생명력 지속 재생: 비활성화
+				숨 돌리기 최대 시간: 20%
+				역할 지속 능력: 비활성화
+			}
+
+			솔저: 76
+			{
+				궁극기 전술 조준경: 비활성화
+				나선 로켓 밀쳐내기 수준 조정: 400%
+				나선 로켓 재사용 대기시간: 250%
+				생명력 지속 재생: 비활성화
+				역할 지속 능력: 비활성화
+				투사체 속도: 7%
+			}
+
+			정크랫
+			{
+				강철 덫 재사용 대기시간: 400%
+				궁극기 죽이는 타이어: 비활성화
+				기본 발사: 비활성화
+				생명력: 500%
+				생명력 지속 재생: 비활성화
+				역할 지속 능력: 비활성화
+				충격 지뢰: 비활성화
+			}
+
+			enabled heroes
+			{
+				로드호그
+				솔저: 76
+				정크랫
+				젠야타
+			}
+		}
+	}
+}
+
+variables
+{
+	global:
+		0: gameProgress
+		1: gameTimerColor
+		2: gameTime
+		3: hostZombie
+		4: zombieKingHealth
+		5: ultra
+		6: zombieSpeed
+		7: ultraHUD
+
+	player:
+		0: selectZombie
+		1: cameraPosition
+		2: aimColor
+		3: spectating
+		4: spectChange
+		5: damageMod
+		6: stamina
+		7: resting
+		8: staminaColor
+		9: staminaProgressBar
+		10: rocket
+		11: rocket1
+		12: rocket2
+		13: rocketCool1
+		14: rocketCool2
+		15: rocketUI
+		16: life
+		17: dead
+		18: canResurrect
+		19: resurrectWho
+		20: inResurrectZone
+		21: resInfo1
+		22: resInfo2
+		23: resInfo3
+		24: zombieProgress
+		25: zombieProgressEffect
+		26: zombieProgressBar
+		27: lifeUI
+		28: climbing
+		29: climbingUI
+		30: ultraGage
+		31: ultraEffect
+		32: posDetect
+		33: zombieRespawnProgress
+		34: zombieRespawnProgressBar
+}
+
+subroutines
+{
+	0: gameTimer
+	1: rocketCool1
+	2: rocketCool2
+	3: zombieProgress
+	4: zombieSpeed
+	5: zombieDamage
+}

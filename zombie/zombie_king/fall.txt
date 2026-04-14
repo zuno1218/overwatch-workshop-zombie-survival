@@ -1,0 +1,28 @@
+rule("낙사")
+{
+	event
+	{
+		Player Died;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(로드호그);
+		Event Was Environment == True;
+	}
+
+	action
+	{
+		Respawn(Event Player);
+		Wait(0.100, Ignore Condition);
+		disabled If(Global.zombieKingHealth >= 600);
+		disabled Set Healing Received(Event Player, 100);
+		disabled Heal(Event Player, Null, Global.zombieKingHealth - 600);
+		disabled Set Healing Received(Event Player, 0);
+		disabled Else;
+		Set Player Health(Event Player, Global.zombieKingHealth);
+	}
+}

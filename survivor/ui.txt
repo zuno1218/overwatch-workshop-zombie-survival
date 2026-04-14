@@ -1,0 +1,161 @@
+rule("스태미나 UI 생성")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(솔저: 76);
+		Event Player.stamina != 100;
+	}
+
+	action
+	{
+		Create Progress Bar In-World Text(Event Player, Event Player.stamina, Custom String("스태미나"), World Vector Of(Vector(2,
+			1 - Sine From Degrees(Vertical Facing Angle Of(Event Player)) * Event Player.cameraPosition[2], Cosine From Degrees(
+			Vertical Facing Angle Of(Event Player)) * 2), Event Player, Rotation And Translation), 0.100, Do Not Clip,
+			Event Player.staminaColor, Color(흰색), Visible To Position Values and Color, Default Visibility);
+		Event Player.staminaProgressBar = Last Text ID;
+	}
+}
+
+rule("스태미나 UI 제거 1")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(솔저: 76);
+		Event Player.stamina == 100;
+	}
+
+	action
+	{
+		Destroy Progress Bar In-World Text(Event Player.staminaProgressBar);
+	}
+}
+
+rule("스태미나 UI 제거 2")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) != Hero(솔저: 76);
+	}
+
+	action
+	{
+		Destroy Progress Bar In-World Text(Event Player.staminaProgressBar);
+	}
+}
+
+disabled rule("나선 로켓 UI")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(솔저: 76);
+	}
+
+	action
+	{
+		Create In-World Text(Event Player, Custom String("{0} {1}/2\n재충전: {2}초", Ability Icon String(Hero(솔저: 76), Button(Secondary Fire)),
+			Event Player.rocket, Min(Event Player.rocketCool1, Event Player.rocketCool2)), World Vector Of(Vector(-0.600,
+			1 - Sine From Degrees(Vertical Facing Angle Of(Event Player)) * Event Player.cameraPosition[2], Cosine From Degrees(
+			Vertical Facing Angle Of(Event Player)) * 2), Event Player, Rotation And Translation), 0.900, Do Not Clip,
+			Visible To Position and String, Color(흰색), Default Visibility);
+		Event Player.rocketUI = Last Text ID;
+	}
+}
+
+disabled rule("나선 로켓 UI 제거")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) != Hero(솔저: 76);
+	}
+
+	action
+	{
+		Destroy In-World Text(Event Player.rocketUI);
+	}
+}
+
+rule("생명 UI")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(솔저: 76);
+	}
+
+	action
+	{
+		Create In-World Text(Event Player, Custom String("{0} ♥", Event Player.life), World Vector Of(Vector(0.500, 2 - Sine From Degrees(
+			Vertical Facing Angle Of(Event Player)) * Event Player.cameraPosition[2], Cosine From Degrees(Vertical Facing Angle Of(
+			Event Player)) * 2), Event Player, Rotation And Translation), 1.500, Do Not Clip, Visible To Position and String, Color(
+			Lime Green), Default Visibility);
+		Event Player.lifeUI = Last Text ID;
+	}
+}
+
+rule("생명 UI 제거")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) != Hero(솔저: 76);
+	}
+
+	action
+	{
+		Destroy In-World Text(Event Player.lifeUI);
+	}
+}

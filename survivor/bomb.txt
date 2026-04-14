@@ -1,0 +1,150 @@
+rule("나선 로켓 피격")
+{
+	event
+	{
+		Player Dealt Knockback;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(솔저: 76);
+		Is Meleeing(Event Player) == False;
+		(Hero Of(Victim) != Hero(솔저: 76) || Victim == Event Player) == True;
+	}
+
+	action
+	{
+		Set Status(Victim, Null, Knocked Down, 3);
+	}
+}
+
+rule("나선 로켓 피격 취소")
+{
+	event
+	{
+		Player Dealt Knockback;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(솔저: 76);
+		(Hero Of(Victim) == Hero(솔저: 76) && Victim != Event Player) == True;
+	}
+
+	action
+	{
+		Start Forcing Player Position(Victim, Victim, False);
+		Wait(0.100, Ignore Condition);
+		Stop Forcing Player Position(Victim);
+	}
+}
+
+disabled rule("나선 로켓 변수")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(솔저: 76);
+	}
+
+	action
+	{
+		Event Player.rocket = 2;
+		Event Player.rocket1 = True;
+		Event Player.rocket2 = True;
+		Event Player.rocketCool1 = 20;
+		Event Player.rocketCool2 = 20;
+	}
+}
+
+disabled rule("나선 로켓 사용")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(솔저: 76);
+		Is Firing Secondary(Event Player) == True;
+	}
+
+	action
+	{
+		Event Player.rocket -= 1;
+		If(Event Player.rocket1 == True);
+			If(Event Player.rocket == 0);
+				Set Secondary Fire Enabled(Event Player, False);
+			End;
+			Start Rule(rocketCool1, Do Nothing);
+		Else If(Event Player.rocket2 == True);
+			If(Event Player.rocket == 0);
+				Set Secondary Fire Enabled(Event Player, False);
+			End;
+			Start Rule(rocketCool2, Do Nothing);
+		End;
+	}
+}
+
+disabled rule("나선 로켓 1 재사용 대기")
+{
+	event
+	{
+		Subroutine;
+		rocketCool1;
+	}
+
+	action
+	{
+		Event Player.rocket1 = False;
+		Chase Player Variable Over Time(Event Player, rocketCool1, 0, 20, Destination and Duration);
+		Wait(20, Ignore Condition);
+		Stop Chasing Player Variable(Event Player, rocketCool1);
+		Event Player.rocketCool1 = 20;
+		Event Player.rocket1 = True;
+		Event Player.rocket += 1;
+		If(Event Player.rocket == 1);
+			Set Secondary Fire Enabled(Event Player, True);
+		End;
+	}
+}
+
+disabled rule("나선 로켓 2 재사용 대기")
+{
+	event
+	{
+		Subroutine;
+		rocketCool2;
+	}
+
+	action
+	{
+		Event Player.rocket2 = False;
+		Chase Player Variable Over Time(Event Player, rocketCool2, 0, 20, Destination and Duration);
+		Wait(20, Ignore Condition);
+		Stop Chasing Player Variable(Event Player, rocketCool2);
+		Event Player.rocketCool2 = 20;
+		Event Player.rocket2 = True;
+		Event Player.rocket += 1;
+		If(Event Player.rocket == 1);
+			Set Secondary Fire Enabled(Event Player, True);
+		End;
+	}
+}

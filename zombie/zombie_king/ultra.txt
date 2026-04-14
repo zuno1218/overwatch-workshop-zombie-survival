@@ -1,0 +1,183 @@
+rule("울트라 변수")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(로드호그);
+	}
+
+	action
+	{
+		Event Player.ultraGage = 0;
+		Global.ultra = False;
+		Set Ability Cooldown(Event Player, Button(Ability 2), 999);
+	}
+}
+
+rule("울트라 충전")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(로드호그);
+		Event Player.ultraGage == 0;
+	}
+
+	action
+	{
+		Chase Player Variable At Rate(Event Player, ultraGage, 100, 0.900, Destination and Rate);
+	}
+}
+
+rule("울트라 피격 충전")
+{
+	event
+	{
+		Player Took Damage;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(로드호그);
+		Event Player.ultraGage < 100;
+		Global.ultra == False;
+		Event Damage < 100;
+	}
+
+	action
+	{
+		Event Player.ultraGage += Event Damage * 0.150;
+	}
+}
+
+rule("울트라 완료")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(로드호그);
+		Event Player.ultraGage >= 100;
+	}
+
+	action
+	{
+		Event Player.ultraGage = 100;
+		Set Ability Cooldown(Event Player, Button(Ability 2), 1);
+		Stop Chasing Player Variable(Event Player, ultraGage);
+		Small Message(Event Player, Custom String("E를 눌러 울트라 사용 가능"));
+	}
+}
+
+rule("울트라 사용")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(로드호그);
+		Is Button Held(Event Player, Button(Ability 2)) == True;
+		Event Player.ultraGage == 100;
+	}
+
+	action
+	{
+		Global.ultra = True;
+		Set Ability Cooldown(Event Player, Button(Ability 2), 999);
+		Create HUD Text(All Players(All Teams), Custom String("ULTRA"), Null, Null, Top, 2, Color(Red), Color(흰색), Color(흰색),
+			Visible To and String, Default Visibility);
+		Global.ultraHUD = Last Text ID;
+		Create Effect(All Players(All Teams), Bad Aura, Color(Red), Event Player, 1, Visible To Position and Radius);
+		Event Player.ultraEffect = Last Created Entity;
+		Chase Player Variable Over Time(Event Player, ultraGage, 0, 20, Destination and Duration);
+		Clear Status(Event Player, Knocked Down);
+		Set Move Speed(Event Player, Global.zombieSpeed + 20);
+		Set Damage Dealt(Event Player, 340);
+		Wait(20, Ignore Condition);
+		Global.ultra = False;
+		Set Move Speed(Event Player, Global.zombieSpeed);
+		Set Damage Dealt(Event Player, 250);
+		Destroy Effect(Event Player.ultraEffect);
+		Destroy HUD Text(Global.ultraHUD);
+	}
+}
+
+rule("울트라 사용 소리")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Global.ultra == True;
+	}
+
+	action
+	{
+		Play Effect(Event Player, Explosion Sound, Color(흰색), Event Player, 100);
+		Play Effect(Event Player, Explosion Sound, Color(흰색), Event Player, 100);
+		Play Effect(Event Player, Explosion Sound, Color(흰색), Event Player, 100);
+	}
+}
+
+disabled rule("울트라 위치 노출")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(솔저: 76);
+		Event Player.dead == False;
+		Global.ultra == True;
+	}
+
+	action
+	{
+		Create Icon(All Players(All Teams), Event Player, Eye, Visible To and Position, Color(Red), True);
+		Event Player.posDetect = Last Created Entity;
+		Small Message(Event Player, Custom String("위치가 노출됩니다!"));
+		Wait(10, Abort When False);
+		Destroy Icon(Event Player.posDetect);
+		Small Message(Event Player, Custom String("위치 노출이 중단됩니다."));
+	}
+}

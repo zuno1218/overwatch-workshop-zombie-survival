@@ -1,0 +1,102 @@
+rule("달리기 변수")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(솔저: 76);
+	}
+
+	action
+	{
+		Event Player.stamina = 100;
+		Event Player.resting = False;
+		Event Player.staminaColor = Color(Green);
+	}
+}
+
+rule("달리기 시작")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(솔저: 76);
+		Is Using Ability 1(Event Player) == True;
+		Event Player.resting == False;
+	}
+
+	action
+	{
+		Stop Chasing Player Variable(Event Player, stamina);
+		Chase Player Variable At Rate(Event Player, stamina, 0, 14.300, Destination and Rate);
+	}
+}
+
+rule("달리기 중지")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(솔저: 76);
+		Is Using Ability 1(Event Player) == 0;
+		Event Player.resting == False;
+	}
+
+	action
+	{
+		Stop Chasing Player Variable(Event Player, stamina);
+		Chase Player Variable At Rate(Event Player, stamina, 100, 10, Destination and Rate);
+	}
+}
+
+rule("휴식")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(솔저: 76);
+		Event Player.stamina == 0;
+	}
+
+	action
+	{
+		Event Player.resting = True;
+		Event Player.staminaColor = Color(Red);
+		Set Ability 1 Enabled(Event Player, False);
+		Small Message(Event Player, Custom String("휴식이 필요합니다!"));
+		Stop Chasing Player Variable(Event Player, stamina);
+		Chase Player Variable Over Time(Event Player, stamina, 100, 12, Destination and Duration);
+		Wait(12, Ignore Condition);
+		Abort If(Hero Of(Event Player) != Hero(솔저: 76));
+		Set Ability 1 Enabled(Event Player, True);
+		Event Player.resting = False;
+		Event Player.staminaColor = Color(Green);
+	}
+}

@@ -1,0 +1,172 @@
+rule("관전")
+{
+	event
+	{
+		Player Joined Match;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+	}
+
+	action
+	{
+		Event Player.spectating = 0;
+		Wait(0.100, Ignore Condition);
+		If(Hero Of(Remove From Array(All Players(All Teams), Players On Hero(Hero(젠야타), All Teams))[Event Player.spectating]) == Hero(
+			로드호그));
+			Event Player.cameraPosition[0] = -1.100;
+			Event Player.cameraPosition[1] = 1.800;
+			Event Player.cameraPosition[2] = 3.900;
+		End;
+		Stop Camera(Event Player);
+		Start Camera(Event Player, Ray Cast Hit Position(World Vector Of(Vector(0, Event Player.cameraPosition[1], 0), Remove From Array(
+			All Players(All Teams), Players On Hero(Hero(젠야타), All Teams))[Event Player.spectating], Rotation And Translation),
+			World Vector Of(Vector(Event Player.cameraPosition[0], Event Player.cameraPosition[1] + Sine From Degrees(
+			Vertical Facing Angle Of(Remove From Array(All Players(All Teams), Players On Hero(Hero(젠야타), All Teams))
+			[Event Player.spectating])) * Event Player.cameraPosition[2], 0 - Cosine From Degrees(Vertical Facing Angle Of(
+			Remove From Array(All Players(All Teams), Players On Hero(Hero(젠야타), All Teams))[Event Player.spectating]))
+			* Event Player.cameraPosition[2]), Remove From Array(All Players(All Teams), Players On Hero(Hero(젠야타), All Teams))
+			[Event Player.spectating], Rotation And Translation), Null, All Players(All Teams), False), World Vector Of(Vector(
+			X Component Of(Local Vector Of(Ray Cast Hit Position(World Vector Of(Vector(0, Event Player.cameraPosition[1], 0),
+			Remove From Array(All Players(All Teams), Players On Hero(Hero(젠야타), All Teams))[Event Player.spectating],
+			Rotation And Translation), World Vector Of(Vector(Event Player.cameraPosition[0],
+			Event Player.cameraPosition[1] + Sine From Degrees(Vertical Facing Angle Of(Remove From Array(All Players(All Teams),
+			Players On Hero(Hero(젠야타), All Teams))[Event Player.spectating])) * Event Player.cameraPosition[2], 0 - Cosine From Degrees(
+			Vertical Facing Angle Of(Remove From Array(All Players(All Teams), Players On Hero(Hero(젠야타), All Teams))
+			[Event Player.spectating])) * Event Player.cameraPosition[2]), Remove From Array(All Players(All Teams), Players On Hero(Hero(
+			젠야타), All Teams))[Event Player.spectating], Rotation And Translation), Null, All Players(All Teams), False), Remove From Array(
+			All Players(All Teams), Players On Hero(Hero(젠야타), All Teams))[Event Player.spectating], Rotation And Translation)),
+			Event Player.cameraPosition[1] - Sine From Degrees(Vertical Facing Angle Of(Remove From Array(All Players(All Teams),
+			Players On Hero(Hero(젠야타), All Teams))[Event Player.spectating])) * 100, Cosine From Degrees(Vertical Facing Angle Of(
+			Remove From Array(All Players(All Teams), Players On Hero(Hero(젠야타), All Teams))[Event Player.spectating])) * 100),
+			Remove From Array(All Players(All Teams), Players On Hero(Hero(젠야타), All Teams))[Event Player.spectating],
+			Rotation And Translation), 100);
+		Start Forcing Player To Be Hero(Event Player, Hero(젠야타));
+		Disable Hero HUD(Event Player);
+		Set Invisible(Event Player, All);
+		Set Status(Event Player, Null, Phased Out, 999);
+		Set Move Speed(Event Player, 200);
+		Set Jump Vertical Speed(Event Player, 200);
+		Set Primary Fire Enabled(Event Player, False);
+		Set Secondary Fire Enabled(Event Player, False);
+		Set Melee Enabled(Event Player, False);
+		Set Ability 1 Enabled(Event Player, False);
+		Set Ability 2 Enabled(Event Player, False);
+		Set Ultimate Ability Enabled(Event Player, False);
+		Create HUD Text(Event Player, Custom String("관전 중"), Null, Null, Top, 4, Color(흰색), Color(흰색), Color(흰색), Visible To and String,
+			Default Visibility);
+	}
+}
+
+rule("관전 변경 1")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(젠야타);
+		Is Button Held(Event Player, Button(Secondary Fire)) == True;
+	}
+
+	action
+	{
+		Event Player.spectating += 1;
+		If(Remove From Array(All Players(All Teams), Players On Hero(Hero(젠야타), All Teams))[Event Player.spectating] == Null);
+			Event Player.spectating = 0;
+		End;
+		If(Hero Of(Remove From Array(All Players(All Teams), Players On Hero(Hero(젠야타), All Teams))[Event Player.spectating]) == Hero(
+			로드호그));
+			Event Player.cameraPosition[0] = -1.100;
+			Event Player.cameraPosition[1] = 1.800;
+			Event Player.cameraPosition[2] = 3.900;
+		Else If(Hero Of(Remove From Array(All Players(All Teams), Players On Hero(Hero(젠야타), All Teams))[Event Player.spectating]) == Hero(
+				솔저: 76));
+			Event Player.cameraPosition[0] = -0.600;
+			Event Player.cameraPosition[1] = 1.700;
+			Event Player.cameraPosition[2] = 2;
+		End;
+	}
+}
+
+rule("관전 변경 2")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(젠야타);
+		Is Button Held(Event Player, Button(Primary Fire)) == True;
+	}
+
+	action
+	{
+		Event Player.spectating -= 1;
+		If(Event Player.spectating == -1);
+			Event Player.spectating = Number Of Players(All Teams) - Number Of Heroes(Hero(젠야타), All Teams) - 1;
+		End;
+		If(Hero Of(Remove From Array(All Players(All Teams), Players On Hero(Hero(젠야타), All Teams))[Event Player.spectating]) == Hero(
+			로드호그));
+			Event Player.cameraPosition[0] = -1.100;
+			Event Player.cameraPosition[1] = 1.800;
+			Event Player.cameraPosition[2] = 3.900;
+		Else If(Hero Of(Remove From Array(All Players(All Teams), Players On Hero(Hero(젠야타), All Teams))[Event Player.spectating]) == Hero(
+				솔저: 76));
+			Event Player.cameraPosition[0] = -0.600;
+			Event Player.cameraPosition[1] = 1.700;
+			Event Player.cameraPosition[2] = 2;
+		End;
+	}
+}
+
+rule("관전 변경 3")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	condition
+	{
+		Global.gameProgress == True;
+		Hero Of(Event Player) == Hero(젠야타);
+		Remove From Array(All Players(All Teams), Players On Hero(Hero(젠야타), All Teams))[Event Player.spectating] == Null;
+		Event Player.spectChange == False;
+	}
+
+	action
+	{
+		Event Player.spectating += 1;
+		If(Remove From Array(All Players(All Teams), Players On Hero(Hero(젠야타), All Teams))[Event Player.spectating] == Null);
+			Event Player.spectating = 0;
+		End;
+		If(Hero Of(Remove From Array(All Players(All Teams), Players On Hero(Hero(젠야타), All Teams))[Event Player.spectating]) == Hero(
+			로드호그));
+			Event Player.cameraPosition[0] = -1.100;
+			Event Player.cameraPosition[1] = 1.800;
+			Event Player.cameraPosition[2] = 3.900;
+		Else If(Hero Of(Remove From Array(All Players(All Teams), Players On Hero(Hero(젠야타), All Teams))[Event Player.spectating]) == Hero(
+				솔저: 76));
+			Event Player.cameraPosition[0] = -0.600;
+			Event Player.cameraPosition[1] = 1.700;
+			Event Player.cameraPosition[2] = 2;
+		End;
+	}
+}
